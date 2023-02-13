@@ -43,8 +43,8 @@ func RouteInit(r *gin.Engine) {
 	root := r.Group("/", globalMiddleware...)
 
 	chatCtrl := controllers.NewChat()
-	forwardRoute := root.Group("/chat")
+	chatRoute := root.Group("/chat")
 	{
-		forwardRoute.POST("/sendMsg", chatCtrl.SendMsg)
+		chatRoute.POST("/sendMsg", chatCtrl.SendMsg)
 	}
 }
