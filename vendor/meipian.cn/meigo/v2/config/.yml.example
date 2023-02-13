@@ -1,0 +1,20 @@
+app: yes
+
+redis_a.host: 127.0.0.1:6379
+redis_a.auth: adfsd
+redis_a.pool_size: 10
+
+redis_b.host: 127.0.0.1:6379
+redis_b.auth: adfsd
+redis_b.pool_size: 10
+
+mysql: root:12345678@tcp(127.0.0.1:3306)/test?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=True&loc=Local
+
+log.path: /data/logs/meigo/meigo.log
+log.daily: yes
+log.format: json
+
+code:
+  0: "success"
+  1001: "system error"
+  1002: "no auth"
