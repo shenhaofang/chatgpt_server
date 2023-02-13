@@ -1,0 +1,5 @@
+app: chatgpt_server
+port: 10100
+debug: true
+
+default_api_keys: "sk-XXXXXXX"
