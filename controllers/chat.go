@@ -11,11 +11,15 @@ import (
 )
 
 type Chat struct {
-	Service services.Chat
+	Srv        services.Chat
+	ChatGPTSrv services.ChatGPT
 }
 
 func NewChat() *Chat {
-	return &Chat{Service: services.NewChat()}
+	return &Chat{
+		Srv:        services.NewChat(),
+		ChatGPTSrv: services.NewChatGPT(),
+	}
 }
 
 func (chat *Chat) SendMsg(c *gin.Context) {
@@ -27,9 +31,27 @@ func (chat *Chat) SendMsg(c *gin.Context) {
 
 	ctx := c.Request.Context()
 
-	resp, err := chat.Service.SendMsg(ctx, *req)
+	resp, err := chat.Srv.SendMsg(ctx, *req)
 	if err != nil {
 		util.OutJsonErrMsg(c, utils.GetErrorCode(utils.ErrorSystemError), utils.GetErrorMsg(utils.ErrorSystemError))
+		return
+	}
+	util.OutJsonOk(c, resp)
+}
+
+func (chat *Chat) SendChatGPTMsg(c *gin.Context) {
+	req := new(models.ReqChatGPTFromCient)
+	if err := c.ShouldBindJSON(req); err != nil {
+		util.OutJsonErrMsg(c, utils.GetErrorCode(utils.ErrorParamsInvalid), utils.GetErrorMsg(utils.ErrorParamsInvalid))
+		return
+	}
+
+	ctx := c.Request.Context()
+
+	resp, err := chat.ChatGPTSrv.SendMsg(ctx, *req)
+	if err != nil {
+		util.OutJsonErrMsg(c, utils.GetErrorCode(utils.ErrorSystemError), utils.GetErrorMsg(utils.ErrorSystemError))
+		return
 	}
 	util.OutJsonOk(c, resp)
 }

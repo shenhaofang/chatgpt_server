@@ -14,21 +14,21 @@ import (
 	"chatgpt_server/utils"
 )
 
-type ChatGPT struct {
+type GPTConfig struct {
 	APIKey string
 	Client *http.Client
 }
 
-type GPTClients []*ChatGPT
+type GPTClients []*GPTConfig
 
-func (g GPTClients) Get(userID int64) *ChatGPT {
+func (g GPTClients) Get(userID int64) *GPTConfig {
 	return g[userID%int64(len(g))]
 }
 
 var gptClients = make(GPTClients, 0, 5)
 
 type Chat interface {
-	SendMsg(ctx context.Context, req models.ReqChat) (*models.RespChatGPT, error)
+	SendMsg(ctx context.Context, req models.ReqChat) (*models.RespGPT3, error)
 }
 
 type chat struct {
@@ -55,7 +55,7 @@ func InitChatGPTs() {
 		panic("no avalible api keys")
 	}
 	for _, apiKey := range apiKeys {
-		gpt := &ChatGPT{
+		gpt := &GPTConfig{
 			APIKey: apiKey,
 			Client: &http.Client{
 				Transport: &http.Transport{
@@ -76,9 +76,9 @@ func NewChat() Chat {
 	return new(chat)
 }
 
-func (c chat) SendMsg(ctx context.Context, request models.ReqChat) (*models.RespChatGPT, error) {
-	chatgpt := gptClients.Get(request.UserID)
-	gptReq := models.CreateReqChatGPTBody(&request)
+func (c chat) SendMsg(ctx context.Context, request models.ReqChat) (*models.RespGPT3, error) {
+	gptClient := gptClients.Get(request.UserID)
+	gptReq := models.CreateReqGPT3(&request)
 	if gptReq == nil {
 		return nil, utils.ErrorParamsInvalid
 	}
@@ -91,12 +91,12 @@ func (c chat) SendMsg(ctx context.Context, request models.ReqChat) (*models.Resp
 		}).Errorln("make request to send msg error")
 		return nil, err
 	}
-	req.Header.Set("Authorization", "Bearer "+chatgpt.APIKey)
+	req.Header.Set("Authorization", "Bearer "+gptClient.APIKey)
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15")
 	// req.Header.Set("Accept", "text/event-stream")
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := chatgpt.Client.Do(req)
+	resp, err := gptClient.Client.Do(req)
 	if err != nil {
 		log.WithCtxFields(ctx, log.Fields{
 			"req":   request,
@@ -132,7 +132,7 @@ func (c chat) SendMsg(ctx context.Context, request models.ReqChat) (*models.Resp
 		}).Errorln("ChatGPT Server error")
 		return nil, utils.ErrorChatGPTError.NewWithMsg(rspData.Error.Message)
 	}
-	return models.ToRespChatGPT(request, *rspData), nil
+	return models.ToRespGPT3(request, *rspData), nil
 	// line := bytes.Split(bodyBytes, []byte("\n\n"))
 	// if len(line) < 2 {
 	// 	log.WithCtxFields(ctx, log.Fields{

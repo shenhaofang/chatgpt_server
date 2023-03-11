@@ -47,4 +47,8 @@ func RouteInit(r *gin.Engine) {
 	{
 		chatRoute.POST("/sendMsg", chatCtrl.SendMsg)
 	}
+	chatGPTRoute := root.Group("/chatGPT")
+	{
+		chatGPTRoute.POST("/sendMsg", chatCtrl.SendChatGPTMsg)
+	}
 }

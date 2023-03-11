@@ -8,7 +8,7 @@ import (
 )
 
 type Chat interface {
-	SendMsg(ctx context.Context, req models.ReqChat) (*models.RespChatGPT, error)
+	SendMsg(ctx context.Context, req models.ReqChat) (*models.RespGPT3, error)
 }
 
 type chat struct {
@@ -21,6 +21,6 @@ func NewChat() Chat {
 	}
 }
 
-func (c chat) SendMsg(ctx context.Context, req models.ReqChat) (*models.RespChatGPT, error) {
+func (c chat) SendMsg(ctx context.Context, req models.ReqChat) (*models.RespGPT3, error) {
 	return c.repo.SendMsg(ctx, req)
 }
