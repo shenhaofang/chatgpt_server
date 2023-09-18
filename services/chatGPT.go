@@ -22,5 +22,25 @@ func NewChatGPT() ChatGPT {
 }
 
 func (c chatGPT) SendMsg(ctx context.Context, req models.ReqChatGPTFromCient) (*models.RespChatGPT, error) {
-	return c.repo.SendMsg(ctx, req)
+	res, err := c.repo.SendMsg(ctx, req)
+	if err != nil {
+		return res, err
+	}
+	if len(res.Choices) == 0 {
+		return res, err
+	}
+	for res.Choices[0].FinishReason == "length" {
+		req.Message = append(req.Message, res.Choices[0].Message)
+		nextRes, err := c.repo.SendMsg(ctx, req)
+		if err != nil {
+			return res, err
+		}
+		if len(res.Choices) == 0 {
+			break
+		}
+		res.Choices[0].Message.Content += nextRes.Choices[0].Message.Content
+		res.Choices[0].FinishReason = nextRes.Choices[0].FinishReason
+		res.Usage = nextRes.Usage
+	}
+	return res, err
 }

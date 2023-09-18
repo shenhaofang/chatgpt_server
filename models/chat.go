@@ -219,7 +219,7 @@ type RespChatGPT struct {
 }
 
 func ToRespChatGPT(body []byte) (*RespChatGPT, error) {
-	var msg *RespChatGPT
+	msg := new(RespChatGPT)
 	err := json.Unmarshal(body, msg)
 	if err != nil {
 		return nil, err

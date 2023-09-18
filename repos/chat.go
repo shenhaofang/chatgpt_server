@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -48,8 +49,8 @@ const (
 )
 
 func InitChatGPTs() {
-	// proxyUrl := "http://127.0.0.1:7890"
-	// u, _ := url.Parse(proxyUrl)
+	proxyUrl := "http://127.0.0.1:7890"
+	u, _ := url.Parse(proxyUrl)
 	apiKeys := getAPIKeys()
 	if len(apiKeys) == 0 {
 		panic("no avalible api keys")
@@ -63,7 +64,7 @@ func InitChatGPTs() {
 					MaxIdleConnsPerHost: DefaultMaxIdleConnsPerHost,
 					MaxConnsPerHost:     DefaultMaxConnsPerHost,
 					IdleConnTimeout:     DefaultIdleConnTimeout,
-					// Proxy:               http.ProxyURL(u),
+					Proxy:               http.ProxyURL(u),
 				},
 				Timeout: DefaultRequestTimeout,
 			},
@@ -92,7 +93,7 @@ func (c chat) SendMsg(ctx context.Context, request models.ReqChat) (*models.Resp
 		return nil, err
 	}
 	req.Header.Set("Authorization", "Bearer "+gptClient.APIKey)
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15")
+	// req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15")
 	// req.Header.Set("Accept", "text/event-stream")
 	req.Header.Set("Content-Type", "application/json")
 
